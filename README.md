@@ -4,7 +4,7 @@ This project builds minimum-risk portfolios of four Budapest Stock Exchange stoc
 
 The short answer is that the estimation period mattered far more than the model. All four models gave similar portfolios within each period, but the portfolios changed almost completely between periods, and the first-period optima fell well inside the second-period efficient frontiers.
 
-![Efficient frontiers by model with the optimal portfolios of both periods](frontok.png)
+![Efficient frontiers by model with the optimal portfolios of both periods](frontiers.png)
 
 ## Data
 
@@ -17,7 +17,7 @@ Daily closing prices from the Budapest Stock Exchange (BÉT historical data), Ma
 | RICHTER | Gedeon Richter | Pharmaceuticals |
 | WABERERS | Waberer's International | Logistics |
 
-Prices are converted to daily log returns (248 observations per stock), stored in `loghozamok.csv`, and split at November 20, 2025:
+Prices are converted to daily log returns (248 observations per stock), stored in `log_returns.csv`, and split at November 20, 2025:
 
 - Period 1: May 21 – November 19, 2025 (127 trading days)
 - Period 2: November 20, 2025 – May 20, 2026 (121 trading days)
@@ -75,7 +75,8 @@ Main observations:
 - Within each period, the four models agree on direction and differ mainly in size. In period 1 every model is long OTP and Waberer's and short Magyar Telekom and Richter, which is what the period's returns favored.
 - Between periods, the portfolios almost flip. Magyar Telekom and Richter go from short positions to the largest long positions, and OTP drops from the dominant holding to roughly zero.
 - Each model is optimal on its own risk measure, as expected: Markowitz has the lowest standard deviation, MAD the lowest mean absolute deviation, and so on.
-- The VaR frontier is step-shaped rather than smooth. As the target return changes, a different combination of binary variables becomes optimal and the solution jumps. This illustrates that VaR, unlike CVaR, is not a coherent risk measure and is numerically less stable on a discrete sample.
+- The VaR frontier is less regular than the Markowitz and MAD frontiers. As the target return changes, a different combination of binary variables can become optimal and the solution jumps. This reflects that VaR, unlike CVaR, is not a coherent risk measure and is less stable on a discrete sample. The VaR frontier also uses a coarser grid of target returns, because the mixed-integer program is slower to solve.
+- The CVaR frontier shows small kinks at high target returns. These are likely an artifact of plotting: the CVaR on the chart is computed from an interpolated sample percentile, which does not match the tail definition used in the optimization exactly.
 - In the figure, the period 1 optima (squares) sit well below and to the right of every period 2 frontier. Portfolios optimized on one regime were clearly inefficient in the next, and the gap between periods is much larger than the gap between models.
 
 The takeaway is that when markets change regime, refining the risk model helps far less than deciding which data to estimate from and how often to rebalance.
@@ -84,11 +85,11 @@ The takeaway is that when markets change regime, refining the risk model helps f
 
 | File | Purpose |
 |---|---|
-| `gen.py` | Loads prices, computes log returns, solves all models for both periods, traces the frontiers, and writes `results.json`, `R1.npy`, `R2.npy`, and `loghozamok.csv` |
-| `figs.py` | Draws the four-panel frontier figure (`frontok.png`) from `results.json` |
-| `lp.py` | Exports the period 1 models as LP files (`AAE1.lp`, `VaR1.lp`, `CVaR1.lp`, `markowitz1.lp`) for an independent cross-check in GLPK/GUSEK |
-| `loghozamok.csv` | Daily log returns used in the analysis |
-
+| `gen.py` | Loads the data, solves all models for both periods, traces the frontiers, and writes `results.json`, `R1.npy`, and `R2.npy` |
+| `figs.py` | Draws the four-panel frontier figure (`frontiers.png`) from `results.json` |
+| `lp.py` | Exports the period 1 models as LP files (`MAD1.lp`, `VaR1.lp`, `CVaR1.lp`, `markowitz1.lp`) for an independent cross-check in GLPK/GUSEK |
+| `log_returns.csv` | Daily log returns used in the analysis |
+| `frontiers.png` | The figure above |
 
 ## How to run
 
@@ -102,11 +103,11 @@ The models are solved with CVXPY, using Clarabel for the quadratic program and H
 
 ```bash
 python gen.py    # solve models, write results.json
-python figs.py   # draw frontok.png
+python figs.py   # draw frontiers.png
 python lp.py     # optional: export LP files for GLPK/GUSEK
 ```
 
-`gen.py` reads the raw BÉT price export (`historikus_2025_05_20__2026_05_20_.xlsx`). Set the `XLSX` path at the top of the script to its location. The processed returns are already included in `loghozamok.csv`.
+`gen.py` works from the repository alone: it reads the daily returns in `log_returns.csv`. If the raw BÉT price export (`historikus_2025_05_20__2026_05_20_.xlsx`) is placed in the same folder, the script rebuilds the returns from prices instead.
 
 ## Limitations
 
