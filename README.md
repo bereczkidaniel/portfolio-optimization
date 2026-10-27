@@ -1,10 +1,8 @@
 # Portfolio Optimization Across Market Regimes
 
-Four risk models, two market regimes, one question: how much does the choice of risk model matter compared with the choice of estimation period?
-
 This project builds minimum-risk portfolios of four Budapest Stock Exchange stocks with four optimization models (Markowitz, mean absolute deviation, Value-at-Risk, and Conditional Value-at-Risk), solves them on two consecutive half-year periods, and checks how the first-period portfolios perform after the market reverses.
 
-The short answer: the estimation period mattered far more than the model. All four models gave similar portfolios within each period, but the portfolios changed almost completely between periods, and the first-period optima fell well inside the second-period efficient frontiers.
+The short answer is that the estimation period mattered far more than the model. All four models gave similar portfolios within each period, but the portfolios changed almost completely between periods, and the first-period optima fell well inside the second-period efficient frontiers.
 
 ![Efficient frontiers by model with the optimal portfolios of both periods](frontok.png)
 
@@ -80,7 +78,7 @@ Main observations:
 - The VaR frontier is step-shaped rather than smooth. As the target return changes, a different combination of binary variables becomes optimal and the solution jumps. This illustrates that VaR, unlike CVaR, is not a coherent risk measure and is numerically less stable on a discrete sample.
 - In the figure, the period 1 optima (squares) sit well below and to the right of every period 2 frontier. Portfolios optimized on one regime were clearly inefficient in the next, and the gap between periods is much larger than the gap between models.
 
-The practical takeaway: when markets change regime, refining the risk model helps far less than deciding which data to estimate from and how often to rebalance.
+The takeaway is that when markets change regime, refining the risk model helps far less than deciding which data to estimate from and how often to rebalance.
 
 ## Repository structure
 
@@ -91,7 +89,6 @@ The practical takeaway: when markets change regime, refining the risk model help
 | `lp.py` | Exports the period 1 models as LP files (`AAE1.lp`, `VaR1.lp`, `CVaR1.lp`, `markowitz1.lp`) for an independent cross-check in GLPK/GUSEK |
 | `loghozamok.csv` | Daily log returns used in the analysis |
 
-Code comments and figure labels are in Hungarian.
 
 ## How to run
 
